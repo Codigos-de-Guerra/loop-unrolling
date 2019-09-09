@@ -14,7 +14,7 @@ try:
     B_file = sys.argv[2]
 
 except:
-    raise Exception("Not enough matrixes passed down as arguments!")
+    raise Exception("Not enough matrices passed down as arguments!")
 
 def create_matrix(file1, file2):# {{{
     with open(A_file, "r") as file:
@@ -58,7 +58,7 @@ A, B = create_matrix(A_file, B_file)
 matrix_size = len(A)
 
 if len(A) != len(B) or len(A[0]) != len(B[0]):
-    raise Exception("Matrixes read can't be multiplied! Try others.")
+    raise Exception("Matrices read can't be multiplied! Try others.")
 
 C = calc_matrix(A, B, matrix_size)
 

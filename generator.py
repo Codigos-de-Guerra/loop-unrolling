@@ -25,5 +25,4 @@ def generator(size):# {{{
 
 for num in sys.argv[1:]:
     generator(int(num))
-    print("Two input files for {}x{} matrixes been created!".format(num,num))
-    # generator(int(sys.argv[1]))
+    print("Two input files for {}x{} matrices been created!".format(num,num))
