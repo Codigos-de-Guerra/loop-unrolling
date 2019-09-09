@@ -7,7 +7,6 @@ import os
 import threading
 # import time
 # import mmap
-import vish
 
 try:
     A_file = sys.argv[1]
@@ -32,29 +31,18 @@ def create_matrix(file1, file2):# {{{
 
     return matrix_A, matrix_B# }}}
 
-def printToFile(result, filename):# {{{
+def printToFile(result, filename, time):# {{{
     with open(filename, 'w') as output:
         buf = ""
         for line in range(len(result)):
             for col in range(len(result)):
                 buf += str(result[line][col]) + " "
             buf += "\n"
+
+        buf += "\ntime: {}".format(round(time, 4))
         output.write(buf)
 
-    print("Output generated! It can be found at '{}'".format(filename))# }}}
-
-def calc_matrix(matrixA, matrixB, size):# {{{
-    res = []
-    for i in range(size):
-        line = []
-        for j in range(size):
-            element = 0
-            for l in range(size):
-                element += matrixA[i][l] * matrixB[l][j]
-            line.append(element)
-        res.append(line)
-
-    return res# }}}
+    print(">> Output generated! It can be found at '{}'\n".format(filename))# }}}
 
 def argsSum(A,B):# {{{
     agrs = []
@@ -141,13 +129,24 @@ if len(A) != len(B) or len(A[0]) != len(B[0]):
 argsSoma = argsSum(A,B)
 argsVezes = argsMulti(A,B)
 
-# t1 = threading.Thread(target=unroll, args=(argsSoma, MatrixSum, 'thre', MatrixSoma))
+a = datetime.now()
 unroll(argsSoma, MatrixSum, 'thre', MatrixSoma)
+b = datetime.now()
+
+thre_sum = (b-a).total_seconds() * 1000 #milliseconds
+
+c = datetime.now()
 unroll(argsVezes, MatrixMulti, 'thre', MatrixVezes)
-# t1.start()
+d = datetime.now()
+
+thre_mul = (d-c).total_seconds() * 1000 #milliseconds
 
 print("Matriz Soma Resultado:")
-printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_size))
+printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_size), thre_sum)
 
 print("Matriz Multiplicação Resultado:")
-printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size))
+printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size), thre_mul)
+
+
+print("Thread Sum time: " + str(thre_sum) + " milliseconds.")
+print("Thread Multiplication time: " + str(thre_mul) + " milliseconds.")
