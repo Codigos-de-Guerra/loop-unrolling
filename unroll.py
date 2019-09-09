@@ -7,8 +7,6 @@ import os
 import threading
 # import time
 # import mmap
-# import signal
-# import struct
 import vish
 
 try:
@@ -18,6 +16,7 @@ try:
 except:
     raise Exception("Not enough matrices passed down as arguments!")
 
+threads = list()
 
 def create_matrix(file1, file2):# {{{
     with open(A_file, "r") as file:
@@ -69,7 +68,6 @@ def argsSum(A,B):# {{{
             agrs.append(ag)
             ag = []
 
-    print(agrs)
     return agrs
 # }}}
 
@@ -81,8 +79,16 @@ def argsMulti(A,B):# {{{
     for idx_i, i in enumerate(A):
         ag = []
         for idx_j, j in enumerate(i):
-            ag.append(j)
-            ag.append(B[idx_i][idx_j])
+            a = []
+            for k in range(len(A)):
+                a.append(A[idx_i][k])
+            ag.append(a)
+
+            a = []
+            for k in range(len(A)):
+                a.append(B[k][idx_j])
+            ag.append(a)
+
             ag.append(idx_i)
             ag.append(idx_j)
             agrs.append(ag)
@@ -91,16 +97,27 @@ def argsMulti(A,B):# {{{
     return agrs
 # }}}
 
-def MatrixMulti(val1, val2, i, j, result):# {{{
-    result[i][j] = val1 + val2# }}}
+def MatrixMulti(linha, col, i, j, result):# {{{
+    ans = 0
+    for k in range(len(linha)):
+        ans += linha[k] * col[k]
+
+    result[i][j] = ans# }}}
 
 def unroll(args, func, method, res):#{{{
     if method == 'proc':
-        pass
-    elif method == 'thre':
         self_t = threading.currentThread()
         for i in range(len(args)):
             func(*args[i], res)
+
+    elif method == 'thre':
+        for i in range(len(args)):
+            t1 = threading.Thread(target=func, args=(*args[i], res))
+            t1.start()
+            threads.append(t1)
+
+        for t in threads:
+            t.join()
 
     else:
         raise Exception("You got nothing!!")
@@ -108,6 +125,8 @@ def unroll(args, func, method, res):#{{{
 # }}}
 
 #---- Main ----#
+A, B = create_matrix(A_file, B_file)
+matrix_size = len(A)
 
 # Matrices initialized{{{
 
@@ -116,22 +135,19 @@ MatrixSoma = [[0 for i in range(matrix_size) ] for i in range(matrix_size)]
 MatrixVezes = [[0 for i in range(matrix_size) ] for i in range(matrix_size)]
 #}}}
 
-A, B = create_matrix(A_file, B_file)
-matrix_size = len(A)
-
 if len(A) != len(B) or len(A[0]) != len(B[0]):
     raise Exception("Matrices read can't be multiplied! Try others.")
 
 argsSoma = argsSum(A,B)
 argsVezes = argsMulti(A,B)
 
-t1 = threading.Thread(target=unroll, args=(argsSoma, MatrixSum, 'thre', MatrixSoma))
-# unroll(argsVezes, MatrixMulti, 'thre', MatrixVezes)
-t1.start()
+# t1 = threading.Thread(target=unroll, args=(argsSoma, MatrixSum, 'thre', MatrixSoma))
+unroll(argsSoma, MatrixSum, 'thre', MatrixSoma)
+unroll(argsVezes, MatrixMulti, 'thre', MatrixVezes)
+# t1.start()
 
-print(MatrixSoma)
 print("Matriz Soma Resultado:")
-printToFile(MatrixSoma, "data/{}x{}/output.dat".format(matrix_size, matrix_size))
+printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_size))
 
 print("Matriz Multiplicação Resultado:")
-printToFile(MatrixVezes, "data/{}x{}/output.dat".format(matrix_size, matrix_size))
+printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size))
