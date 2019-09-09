@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-import posix_ipc
 import sys
 import os
 import threading

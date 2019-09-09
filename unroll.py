@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
-import posix_ipc
 import sys
 import os
 import threading
@@ -39,8 +38,11 @@ def printToFile(result, filename, time):# {{{
                 buf += str(result[line][col]) + " "
             buf += "\n"
 
-        buf += "\ntime: {}".format(round(time, 4))
+        buf += "\ntime: {}".format(round(time, 4)) + "\n"
         output.write(buf)
+        # idea of how to implement the times' file
+        # with open('times.ti', 'w') as output:
+        #     buf += round(time, 4) + "\n"
 
     print(">> Output generated! It can be found at '{}'\n".format(filename))# }}}
 
@@ -100,9 +102,9 @@ def unroll(args, func, method, res):#{{{
 
     elif method == 'thre':
         for i in range(len(args)):
-            t1 = threading.Thread(target=func, args=(*args[i], res))
-            t1.start()
-            threads.append(t1)
+            t = threading.Thread(target=func, args=(*args[i], res))
+            t.start()
+            threads.append(t)
 
         for t in threads:
             t.join()
@@ -146,7 +148,6 @@ printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_si
 
 print("Matriz Multiplicação Resultado:")
 printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size), thre_mul)
-
 
 print("Thread Sum time: " + str(thre_sum) + " milliseconds.")
 print("Thread Multiplication time: " + str(thre_mul) + " milliseconds.")
