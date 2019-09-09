@@ -41,8 +41,8 @@ def printToFile(result, filename, time):# {{{
         buf += "\ntime: {}".format(round(time, 4)) + "\n"
         output.write(buf)
         # idea of how to implement the times' file
-        # with open('times.ti', 'w') as output:
-        #     buf += round(time, 4) + "\n"
+    # with open('times.ti', 'w') as output:
+        # buf = round(time, 4) + "\n"
 
     print(">> Output generated! It can be found at '{}'\n".format(filename))# }}}
 
@@ -149,5 +149,5 @@ printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_si
 print("Matriz Multiplicação Resultado:")
 printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size), thre_mul)
 
-print("Thread Sum time: " + str(thre_sum) + " milliseconds.")
-print("Thread Multiplication time: " + str(thre_mul) + " milliseconds.")
+def parallel():
+    return round(thre_sum,4), round(thre_mul,4)

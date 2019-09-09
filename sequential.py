@@ -120,5 +120,5 @@ d = datetime.now()
 
 seq_mul = (d-c).total_seconds() * 1000 #milliseconds
 
-print("Sequential sum took {} milliseconds to complete.".format(seq_sum))
-print("Sequential multiplication took {} milliseconds to complete.".format(seq_mul))
+def seq():
+    return round(seq_sum, 4), round(seq_mul, 4)
