@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
+import posix_ipc
+import sys
+import os
+import threading
 # import time
-# import os
 # import mmap
 # import signal
-# import posix_ipc
-import sys
 # import struct
 import vish
 
@@ -15,6 +17,7 @@ try:
 
 except:
     raise Exception("Not enough matrices passed down as arguments!")
+
 
 def create_matrix(file1, file2):# {{{
     with open(A_file, "r") as file:
@@ -30,6 +33,17 @@ def create_matrix(file1, file2):# {{{
 
     return matrix_A, matrix_B# }}}
 
+def printToFile(result, filename):# {{{
+    with open(filename, 'w') as output:
+        buf = ""
+        for line in range(len(result)):
+            for col in range(len(result)):
+                buf += str(result[line][col]) + " "
+            buf += "\n"
+        output.write(buf)
+
+    print("Output generated! It can be found at '{}'".format(filename))# }}}
+
 def calc_matrix(matrixA, matrixB, size):# {{{
     res = []
     for i in range(size):
@@ -43,16 +57,64 @@ def calc_matrix(matrixA, matrixB, size):# {{{
 
     return res# }}}
 
-def printToFile(result, filename):# {{{
-    with open(filename, 'w') as output:
-        buf = ""
-        for line in range(len(result)):
-            for col in range(len(result)):
-                buf += str(result[line][col]) + " "
-            buf += "\n"
-        output.write(buf)
+def argsSum(A,B):# {{{
+    agrs = []
+    for idx_i, i in enumerate(A):
+        ag = []
+        for idx_j, j in enumerate(i):
+            ag.append(j)
+            ag.append(B[idx_i][idx_j])
+            ag.append(idx_i)
+            ag.append(idx_j)
+            agrs.append(ag)
+            ag = []
 
-    print("Output generated! It can be found at '{}'".format(filename))# }}}
+    print(agrs)
+    return agrs
+# }}}
+
+def MatrixSum(val1, val2, i, j, result):# {{{
+    result[i][j] = val1 + val2# }}}
+
+def argsMulti(A,B):# {{{
+    agrs = []
+    for idx_i, i in enumerate(A):
+        ag = []
+        for idx_j, j in enumerate(i):
+            ag.append(j)
+            ag.append(B[idx_i][idx_j])
+            ag.append(idx_i)
+            ag.append(idx_j)
+            agrs.append(ag)
+            ag = []
+
+    return agrs
+# }}}
+
+def MatrixMulti(val1, val2, i, j, result):# {{{
+    result[i][j] = val1 + val2# }}}
+
+def unroll(args, func, method, res):#{{{
+    if method == 'proc':
+        pass
+    elif method == 'thre':
+        self_t = threading.currentThread()
+        for i in range(len(args)):
+            func(*args[i], res)
+
+    else:
+        raise Exception("You got nothing!!")
+
+# }}}
+
+#---- Main ----#
+
+# Matrices initialized{{{
+
+MatrixSoma = [[0 for i in range(matrix_size) ] for i in range(matrix_size)]
+
+MatrixVezes = [[0 for i in range(matrix_size) ] for i in range(matrix_size)]
+#}}}
 
 A, B = create_matrix(A_file, B_file)
 matrix_size = len(A)
@@ -60,18 +122,16 @@ matrix_size = len(A)
 if len(A) != len(B) or len(A[0]) != len(B[0]):
     raise Exception("Matrices read can't be multiplied! Try others.")
 
-C = calc_matrix(A, B, matrix_size)
+argsSoma = argsSum(A,B)
+argsVezes = argsMulti(A,B)
 
-# print(A)
-# print(B)
+t1 = threading.Thread(target=unroll, args=(argsSoma, MatrixSum, 'thre', MatrixSoma))
+# unroll(argsVezes, MatrixMulti, 'thre', MatrixVezes)
+t1.start()
 
-print("Matriz Resultado:")
-# buf = ""
-# for i in C:
-#     buf += "| "
-#     for j in i:
-#         buf += str(j) + " "
-#     buf += '|\n'
+print(MatrixSoma)
+print("Matriz Soma Resultado:")
+printToFile(MatrixSoma, "data/{}x{}/output.dat".format(matrix_size, matrix_size))
 
-# print(buf)
-printToFile(C, "data/{}x{}/output.dat".format(matrix_size, matrix_size))
+print("Matriz Multiplicação Resultado:")
+printToFile(MatrixVezes, "data/{}x{}/output.dat".format(matrix_size, matrix_size))
