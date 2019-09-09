@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 from datetime import datetime
+import posix_ipc
 import sys
+import os
+import threading
 # import time
 # import mmap
-# import signal
-# import struct
-import vish
 
 try:
     A_file = sys.argv[1]
@@ -29,53 +29,97 @@ def create_matrix(file1, file2):# {{{
 
     return matrix_A, matrix_B# }}}
 
-def calc_matrix(matrixA, matrixB, size):# {{{
-    res = []
-    for i in range(size):
-        line = []
-        for j in range(size):
-            element = 0
-            for l in range(size):
-                element += matrixA[i][l] * matrixB[l][j]
-            line.append(element)
-        res.append(line)
+def argsSum(A,B):# {{{
+    agrs = []
+    for idx_i, i in enumerate(A):
+        ag = []
+        for idx_j, j in enumerate(i):
+            ag.append(j)
+            ag.append(B[idx_i][idx_j])
+            ag.append(idx_i)
+            ag.append(idx_j)
+            agrs.append(ag)
+            ag = []
 
-    return res# }}}
+    return agrs
+# }}}
 
-def printToFile(result, filename):# {{{
-    with open(filename, 'w') as output:
-        buf = ""
-        for line in range(len(result)):
-            for col in range(len(result)):
-                buf += str(result[line][col]) + " "
-            buf += "\n"
-        output.write(buf)
+def MatrixSum(val1, val2, i, j, result):# {{{
+    result[i][j] = val1 + val2# }}}
 
-    print("Output generated! It can be found at '{}'".format(filename))# }}}
+def argsMulti(A,B):# {{{
+    agrs = []
+    for idx_i, i in enumerate(A):
+        ag = []
+        for idx_j, j in enumerate(i):
+            a = []
+            for k in range(len(A)):
+                a.append(A[idx_i][k])
+            ag.append(a)
 
+            a = []
+            for k in range(len(A)):
+                a.append(B[k][idx_j])
+            ag.append(a)
+
+            ag.append(idx_i)
+            ag.append(idx_j)
+            agrs.append(ag)
+            ag = []
+
+    return agrs
+# }}}
+
+def MatrixMulti(linha, col, i, j, result):# {{{
+    ans = 0
+    for k in range(len(linha)):
+        ans += linha[k] * col[k]
+
+    result[i][j] = ans# }}}
+
+def unroll(args, func, method, res):#{{{
+    if method == 'proc':
+        self_t = threading.currentThread()
+        for i in range(len(args)):
+            func(*args[i], res)
+
+    elif method == 'thre':
+        for i in range(len(args)):
+            func(*args[i], res)
+
+    else:
+        raise Exception("You got nothing!!")
+
+# }}}
+
+#---- Main ----#
 A, B = create_matrix(A_file, B_file)
 matrix_size = len(A)
+
+# Matrices initialized{{{
+
+MatrixSoma = [[0 for i in range(matrix_size) ] for i in range(matrix_size)]
+
+MatrixVezes = [[0 for i in range(matrix_size) ] for i in range(matrix_size)]
+#}}}
 
 if len(A) != len(B) or len(A[0]) != len(B[0]):
     raise Exception("Matrices read can't be multiplied! Try others.")
 
+argsSoma = argsSum(A,B)
+argsVezes = argsMulti(A,B)
+
 a = datetime.now()
-C = calc_matrix(A, B, matrix_size)
+unroll(argsSoma, MatrixSum, 'thre', MatrixSoma)
 b = datetime.now()
 
-time_took = (b-a).total_seconds() * 1000
+seq_sum = (b-a).total_seconds() * 1000 #milliseconds
 
-# print(A)
-# print(B)
+c = datetime.now()
+unroll(argsVezes, MatrixMulti, 'thre', MatrixVezes)
+d = datetime.now()
 
-print("Matriz Resultado:")
-# buf = ""
-# for i in C:
-#     buf += "| "
-#     for j in i:
-#         buf += str(j) + " "
-#     buf += '|\n'
+seq_mul = (d-c).total_seconds() * 1000 #milliseconds
 
-# print(buf)
-printToFile(C, "data/{}x{}/output.dat".format(matrix_size, matrix_size))
-print("Sequencial took {} milliseconds".format(time_took))
+print("Sequential sum took {} milliseconds to complete.".format(seq_sum))
+print("Sequential multiplication took {} milliseconds to complete.".format(seq_mul))
