@@ -4,8 +4,6 @@ from datetime import datetime
 import sys
 import os
 import threading
-# import time
-# import mmap
 
 try:
     A_file = sys.argv[1]
@@ -30,7 +28,7 @@ def create_matrix(file1, file2):# {{{
 
     return matrix_A, matrix_B# }}}
 
-def printToFile(result, filename, time):# {{{
+def printToFile(result, filename, time_seq, time_par):# {{{
     with open(filename, 'w') as output:
         buf = ""
         for line in range(len(result)):
@@ -38,11 +36,9 @@ def printToFile(result, filename, time):# {{{
                 buf += str(result[line][col]) + " "
             buf += "\n"
 
-        buf += "\ntime: {}".format(round(time, 4)) + "\n"
+        buf += "\ntime sequential: {}".format(round(time_seq, 4))
+        buf += "\ntime thread: {}".format(round(time_par,4)) + "\n"
         output.write(buf)
-        # idea of how to implement the times' file
-    # with open('times.ti', 'w') as output:
-        # buf = round(time, 4) + "\n"
 
     print(">> Output generated! It can be found at '{}'\n".format(filename))# }}}
 
@@ -143,11 +139,15 @@ d = datetime.now()
 
 thre_mul = (d-c).total_seconds() * 1000 #milliseconds
 
-print("Matriz Soma Resultado:")
-printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_size), thre_sum)
+# print("Matriz Soma Resultado:")
+# printToFile(MatrixSoma, "data/{}x{}/outputSum.dat".format(matrix_size, matrix_size), thre_sum)
 
-print("Matriz Multiplicação Resultado:")
-printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size), thre_mul)
+# print("Matriz Multiplicação Resultado:")
+# printToFile(MatrixVezes, "data/{}x{}/outputMul.dat".format(matrix_size, matrix_size), thre_mul)
 
 def parallel():
     return round(thre_sum,4), round(thre_mul,4)
+def Sum():
+    return MatrixSoma
+def Mul():
+    return MatrixVezes

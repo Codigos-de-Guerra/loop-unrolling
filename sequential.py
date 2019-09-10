@@ -4,8 +4,6 @@ from datetime import datetime
 import sys
 import os
 import threading
-# import time
-# import mmap
 
 try:
     A_file = sys.argv[1]
