@@ -63,3 +63,7 @@ guardam as informações de tempo de cada execução, criamos os gráficos a seg
 
 
 ![kk](img/Multiplicacao.png)
+
+Como pode-se notar, ao contrário do que muitos esperavam, a aplicação sequencial
+funciona de forma mais rápida e eficaz do que a aplicação que optou por se
+separar em processos paralelos.
