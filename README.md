@@ -51,5 +51,15 @@ for t in threads:
 ```
 
 Onde criamos uma thread com a função alvo sendo a função passada como parâmetro
-para o `unroll` e os argumentos são uma tupla com os arguemntos propriamente
+para o `unroll` e os argumentos são uma tupla com os argumentos propriamente
 ditos para a execução da função e a lista para armazenar os resultados.
+
+Quanto à necessidade visual de se comparar as formas sequenciais e paralelas,
+foi também implementada uma forma de plotar em gráficos tais comparações.
+Usando o arquivo `plot.py` no diretório raiz, juntamente com arquivos que
+guardam as informações de tempo de cada execução, criamos os gráficos a seguir:
+
+![000000_Tim](img/Soma.png)
+
+
+![kk](img/Multiplicacao.png)
