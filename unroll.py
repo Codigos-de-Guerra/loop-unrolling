@@ -92,10 +92,19 @@ def MatrixMulti(linha, col, i, j, result):# {{{
 
 def unroll(args, func, method, res):#{{{
     if method == 'proc':
-        self_t = threading.currentThread()
+        children = []
         for i in range(len(args)):
-            func(*args[i], res)
-
+            child = os.fork()
+            
+            if child == 0:
+                func(*args[i], res)
+                os._exit(0)
+            else:
+                children.append(child)
+                
+        for child in children:
+            os.waitpid(child,0)
+            
     elif method == 'thre':
         for i in range(len(args)):
             t = threading.Thread(target=func, args=(*args[i], res))
